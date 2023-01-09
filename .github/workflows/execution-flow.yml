@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**/README.md' # This will ignore all pushs that changes only the README.md
 jobs:
   lint:
     runs-on: ubuntu-latest

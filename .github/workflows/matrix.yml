@@ -2,6 +2,9 @@ name: Matrix Demo
 on: push
 jobs:
   build:
+    # When using matrix, if one job fail the others are cancelled and skipped.
+    # If you don't want that behaviour you can add the 'continues-on-error' on the job level:
+    continue-on-error: true
     strategy:
       matrix:
         node-version: [12, 14, 16]

@@ -86,6 +86,8 @@ jobs:
     uses: ./.github/workflows/reusable.yml # this is a relative path to a workflow in the same repository
     with:
       artifact-name: dist-files # here we are passing an expected input
+    # secrets:
+    #   some-secret: ${{ secrets.some-secret }}
     # runs-on: ubuntu-latest
     # steps:
     #   - name: Get build artifacts

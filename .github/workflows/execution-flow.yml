@@ -15,9 +15,13 @@ jobs:
         id: cache
         uses: actions/cache@v3
         with:
-          path: ~/.npm
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Lint code
         run: npm run lint
@@ -30,9 +34,13 @@ jobs:
         id: cache
         uses: actions/cache@v3
         with:
-          path: ~/.npm
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Test code
         id: run-tests
@@ -57,9 +65,13 @@ jobs:
         id: cache
         uses: actions/cache@v3
         with:
-          path: ~/.npm
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build website
         id: build-website

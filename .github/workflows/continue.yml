@@ -1,4 +1,4 @@
-name: Website Deployment
+name: Continue Website Deployment
 on:
   push:
     branches:
@@ -43,7 +43,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Test code
-        continue-on-error: true
+        # If you want your entire workflow to continue even if a step fails you can add this continue-on-error
+        # but usually that won't be the case for a test step and a if: failure() && steps.run-tests.outcome == 'failure'
+        # would be better for the report and stop all the rest of the workflow and don't build the project
+        continue-on-error: true 
         id: run-tests
         run: npm run test
       - name: Upload test report

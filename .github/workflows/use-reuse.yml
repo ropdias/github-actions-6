@@ -98,6 +98,13 @@ jobs:
     #     run: ls
     #   - name: Deploy
     #     run: echo "Deploying..."
+  print-deploy-result:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print deploy output
+        # Here we are accessing the outputs from the deploy job by using the needs context
+        run: echo "${{ needs.deploy.outputs.result }}"
   report:
     needs: [lint, deploy] # It will wait for all the deploy chain (test->build->deploy) before run
     if: failure()

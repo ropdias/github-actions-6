@@ -7,11 +7,19 @@ on:
         required: false # If we set this to true we can't call this workflow from outside without providing this value
         default: dist # We could also add a default value and change required to false for example
         type: string # We need to specify the type of the value
+    outputs: # We can set outputs that are returned by this reusable workflow to the workflow that called him
+      result: # The name of this output will be 'result'
+        description: The result of the deployment operation
+        # the jobs context is only used in a reusable workflow
+        value: ${{ jobs.deploy.outputs.outcome }} # Here we are getting the output of the deploy job
     # secrets:
     #   some-secret:
     #     required: true
 jobs:
   deploy:
+    # Here we are establishing that this job should output a value named outcome by getting the output of the step with the id 'set-result'
+    outputs:
+      outcome: ${{ steps.set-result.outputs.step-result }}
     runs-on: ubuntu-latest
     steps:
       - name: Get Code
@@ -22,3 +30,6 @@ jobs:
         run: ls
       - name: Output information
         run: echo "Deploying & uploading..."
+      - name: Set result output
+        id: set-result
+        run: echo "step-result=success" >> $GITHUB_OUTPUT

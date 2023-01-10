@@ -1,0 +1,105 @@
+name: Using Reusable Workflow
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/README.md' # This will ignore all pushs that changes only the README.md
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Lint code
+        run: npm run lint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Test code
+        id: run-tests
+        run: npm run test
+      - name: Upload test report
+        # Here we can omit the ${{}}
+        # We are using the Special Conditional Function failure() that returns true when any previous Step or Job failed
+        # We need to use that otherwise or if condition wont work even if we check for 'failure' in the outcome
+        # There are 4 Special Conditional Functions: failure(), success(), always() and cancelled()
+        if: failure() && steps.run-tests.outcome == 'failure' 
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test.json
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules # we changed here to use the local node_modules instead of the global npm folder
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        # the actions/cache@v3 has an output named cache-hit that we can use to check if
+        # we found an exact match for the key in the cache
+        # Obs: that output is converted to a string in this steps context object
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Build website
+        id: build-website
+        run: npm run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist
+  deploy:
+    needs: build
+    uses: ./.github/workflows/reusable.yml # this is a relative path to a workflow in the same repository
+    # runs-on: ubuntu-latest
+    # steps:
+    #   - name: Get build artifacts
+    #     uses: actions/download-artifact@v3
+    #     with:
+    #       name: dist-files
+    #   - name: Output contents
+    #     run: ls
+    #   - name: Deploy
+    #     run: echo "Deploying..."
+  report:
+    needs: [lint, deploy] # It will wait for all the deploy chain (test->build->deploy) before run
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output Information
+        run: |
+          echo "Something went wrong"
+          echo "${{ toJSON(github) }}"

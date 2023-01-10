@@ -82,11 +82,11 @@ jobs:
       - name: Deploy
         run: echo "Deploying..."
   report:
-    needs: [lint, deploy] # It will wait for all the deploy chain (test->build->deploy) before run
+    # needs: [lint, deploy] # It will wait for all the deploy chain (test->build->deploy) before run
     if: failure()
     runs-on: ubuntu-latest
     steps:
       - name: Output Information
-      run: |
-        echo "Something went wrong"
-        echo "${{ github }}"
+        run: |
+          echo "Something went wrong"
+          echo "${{ github }}"

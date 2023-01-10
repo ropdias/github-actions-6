@@ -9,6 +9,12 @@ jobs:
       matrix:
         node-version: [12, 14, 16]
         operating-system: [ubuntu-latest, windows-latest]
+        include: # You can add an additional single combination by using the include key
+          - node-version: 18
+            operating-system: ubuntu-latest
+        exclude: # You can exclude a combination by using the exclude key
+          - node-version: 12
+            operating-system: windows-latest
     runs-on: ${{ matrix.operating-system }} # This will run multiple times, once per value in the operating-system list
     steps:
       - name: Get Code
